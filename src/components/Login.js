@@ -1,8 +1,20 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import Header from "./Header";
+import { validateEmail } from "../utils/validateEmail";
+import { validatePassword } from "../utils/validatePassword";
 
 const Login = () => {
   const [isSignIn, setIsSignIn] = useState(true);
+  const email = useRef(null);
+  const password = useRef(null);
+  const [emailErr, setEmailErr] = useState(null);
+  const [passErr, setPassErr] = useState(null);
+
+  const handleButtonClick = (e) => {
+    e.preventDefault();
+    setEmailErr(validateEmail(email.current.value));
+    setPassErr(validatePassword(password.current.value));
+  };
 
   const toggleSignInForm = () => {
     setIsSignIn(!isSignIn);
@@ -27,20 +39,22 @@ const Login = () => {
           ></input>
         )}
         <input
+          ref={email}
           type="text"
           placeholder="Email Address"
           className="p-4 my-2 w-full bg-black rounded-lg border border-gray-600 bg-opacity-75 "
         ></input>
+        {emailErr && <p className="text-red-700 text-xl">{emailErr}</p>}
         <input
+          ref={password}
           type="password"
           placeholder="Password"
           className="p-4 my-2 w-full bg-black rounded-lg border border-gray-600 bg-opacity-75 "
         ></input>
+        {passErr && <p className="text-red-700 text-xl">{passErr}</p>}
         <button
           className="my-6 bg-red-700 py-4 w-full rounded-lg"
-          onClick={(e) => {
-            e.preventDefault();
-          }}
+          onClick={handleButtonClick}
         >
           {isSignIn ? "Sign In" : "Sign Up"}
         </button>
