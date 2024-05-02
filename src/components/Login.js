@@ -29,31 +29,31 @@ const Login = () => {
           className="brightness-50"
         />
       </div>
-      <form className="absolute p-12  bg-black w-3/12 my-36 mx-auto right-0 left-0 text-white bg-opacity-75 rounded-lg">
+      <form className="absolute p-12  bg-black w-3/12 my-36 mx-auto right-0 left-0 text-white bg-opacity-75 rounded-sm">
         <h1 className="text-3xl py-4">{isSignIn ? "Sign In" : "Sign Up"}</h1>
         {!isSignIn && (
           <input
             type="text"
             placeholder="First and Last Name"
-            className="p-4 my-2 w-full bg-black rounded-lg border border-gray-600 bg-opacity-75 "
+            className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
           ></input>
         )}
         <input
           ref={email}
           type="text"
           placeholder="Email Address"
-          className="p-4 my-2 w-full bg-black rounded-lg border border-gray-600 bg-opacity-75 "
+          className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
         ></input>
         {emailErr && <p className="text-red-700 text-xl">{emailErr}</p>}
         <input
           ref={password}
           type="password"
           placeholder="Password"
-          className="p-4 my-2 w-full bg-black rounded-lg border border-gray-600 bg-opacity-75 "
+          className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
         ></input>
         {passErr && <p className="text-red-700 text-xl">{passErr}</p>}
         <button
-          className="my-6 bg-red-700 py-4 w-full rounded-lg"
+          className="my-6 bg-red-700 py-4 w-full rounded-sm"
           onClick={handleButtonClick}
         >
           {isSignIn ? "Sign In" : "Sign Up"}
