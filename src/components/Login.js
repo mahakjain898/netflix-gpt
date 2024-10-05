@@ -72,7 +72,7 @@ const Login = () => {
           <div>
             <p className="inline-block text-gray-500">Already a User? </p>
             <p
-              className="px-2 inline-block cursor-pointer"
+              className="my-6 px-2 inline-block cursor-pointer"
               onClick={toggleSignInForm}
             >
               Sign In.
