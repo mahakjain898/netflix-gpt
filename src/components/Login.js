@@ -2,8 +2,15 @@ import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { validateEmail } from "../utils/validateEmail";
 import { validatePassword } from "../utils/validatePassword";
+import { auth } from "../utils/firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [isSignIn, setIsSignIn] = useState(true);
   const email = useRef(null);
   const password = useRef(null);
@@ -12,8 +19,49 @@ const Login = () => {
 
   const handleButtonClick = (e) => {
     e.preventDefault();
-    setEmailErr(validateEmail(email.current.value));
-    setPassErr(validatePassword(password.current.value));
+    const emailValidationErr = validateEmail(email.current.value);
+    const passwordValidationErr = validatePassword(password.current.value);
+
+    setEmailErr(emailValidationErr);
+    setPassErr(passwordValidationErr);
+    if (emailErr || passErr) return;
+
+    if (!isSignIn) {
+      // SIgn up logic
+
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed up
+          const user = userCredential.user;
+          console.log(user);
+          navigate("/browse");
+        })
+        .catch((error) => {
+          setEmailErr(error.message);
+          // console.log(errorCode + "-" + errorMessage);
+        });
+    } else {
+      signInWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+          navigate("/browse");
+          // ...
+        })
+        .catch((error) => {
+          setEmailErr(error.message);
+          // console.log(errorCode + errorMessage);
+        });
+    }
   };
 
   const toggleSignInForm = () => {
