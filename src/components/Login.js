@@ -1,50 +1,55 @@
-import React, { useRef, useState } from "react";
+import { useState, useRef } from "react";
 import Header from "./Header";
-import { validateEmail } from "../utils/validateEmail";
-import { validatePassword } from "../utils/validatePassword";
-import { auth } from "../utils/firebase";
+import { checkValidData } from "../utils/validate";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from "firebase/auth";
+import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [isSignInForm, setIsSignInForm] = useState(true);
+  const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
-  const [isSignIn, setIsSignIn] = useState(true);
+
+  const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
-  const [emailErr, setEmailErr] = useState(null);
-  const [passErr, setPassErr] = useState(null);
 
-  const handleButtonClick = (e) => {
-    e.preventDefault();
-    const emailValidationErr = validateEmail(email.current.value);
-    const passwordValidationErr = validatePassword(password.current.value);
+  const handleButtonClick = () => {
+    const message = checkValidData(email.current.value, password.current.value);
+    setErrorMessage(message);
+    if (message) return;
 
-    setEmailErr(emailValidationErr);
-    setPassErr(passwordValidationErr);
-    if (emailErr || passErr) return;
-
-    if (!isSignIn) {
-      // SIgn up logic
-
+    if (!isSignInForm) {
+      // Sign Up Logic
       createUserWithEmailAndPassword(
         auth,
         email.current.value,
         password.current.value
       )
         .then((userCredential) => {
-          // Signed up
           const user = userCredential.user;
-          console.log(user);
-          navigate("/browse");
+          updateProfile(user, {
+            displayName: name.current.value,
+            photoURL: "https://avatars.githubusercontent.com/u/12824231?v=4",
+          })
+            .then(() => {
+              navigate("/browse");
+            })
+            .catch((error) => {
+              setErrorMessage(error.message);
+            });
         })
         .catch((error) => {
-          setEmailErr(error.message);
-          // console.log(errorCode + "-" + errorMessage);
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
         });
     } else {
+      // Sign In Logic
       signInWithEmailAndPassword(
         auth,
         email.current.value,
@@ -55,81 +60,69 @@ const Login = () => {
           const user = userCredential.user;
           console.log(user);
           navigate("/browse");
-          // ...
         })
         .catch((error) => {
-          setEmailErr(error.message);
-          // console.log(errorCode + errorMessage);
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode + "-" + errorMessage);
         });
     }
   };
 
   const toggleSignInForm = () => {
-    setIsSignIn(!isSignIn);
+    setIsSignInForm(!isSignInForm);
   };
   return (
     <div>
       <Header />
       <div className="absolute">
         <img
-          src="https://assets.nflxext.com/ffe/siteui/vlv3/058eee37-6c24-403a-95bd-7d85d3260ae1/5030300f-ed0c-473a-9795-a5123d1dd81d/US-en-20240422-POP_SIGNUP_TWO_WEEKS-perspective_WEB_0941c399-f3c4-4352-8c6d-0a3281e37aa0_large.jpg"
-          alt="BACKGROUD"
-          className="brightness-50"
+          src="https://assets.nflxext.com/ffe/siteui/vlv3/fc164b4b-f085-44ee-bb7f-ec7df8539eff/d23a1608-7d90-4da1-93d6-bae2fe60a69b/IN-en-20230814-popsignuptwoweeks-perspective_alpha_website_large.jpg"
+          alt="logo"
         />
       </div>
-      <form className="absolute p-12  bg-black w-3/12 my-36 mx-auto right-0 left-0 text-white bg-opacity-75 rounded-sm">
-        <h1 className="text-3xl py-4">{isSignIn ? "Sign In" : "Sign Up"}</h1>
-        {!isSignIn && (
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="w-3/12 absolute p-12 bg-black my-36 mx-auto right-0 left-0 text-white rounded-lg bg-opacity-80"
+      >
+        <h1 className="font-bold text-3xl py-4">
+          {isSignInForm ? "Sign In" : "Sign Up"}
+        </h1>
+
+        {!isSignInForm && (
           <input
+            ref={name}
             type="text"
-            placeholder="First and Last Name"
-            className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
-          ></input>
+            placeholder="Full Name"
+            className="p-4 my-4 w-full bg-gray-700"
+          />
         )}
         <input
           ref={email}
           type="text"
           placeholder="Email Address"
-          className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
-        ></input>
-        {emailErr && <p className="text-red-700 text-xl">{emailErr}</p>}
+          className="p-4 my-4 w-full bg-gray-700"
+        />
         <input
           ref={password}
           type="password"
           placeholder="Password"
-          className="p-4 my-2 w-full bg-black rounded-sm border border-gray-600 bg-opacity-75 "
-        ></input>
-        {passErr && <p className="text-red-700 text-xl">{passErr}</p>}
+          className="p-4 my-4 w-full bg-gray-700"
+        />
+        <p className="text-red-500 font-bold text-lg py-2">{errorMessage}</p>
         <button
-          className="my-6 bg-red-700 py-4 w-full rounded-sm"
+          className="p-4 my-6 bg-red-700 w-full rounded-lg"
           onClick={handleButtonClick}
         >
-          {isSignIn ? "Sign In" : "Sign Up"}
+          {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
-        {isSignIn ? (
-          <div>
-            <p className="inline-block text-gray-500">New to Netflix? </p>
-            <p
-              className="px-2 inline-block cursor-pointer"
-              onClick={toggleSignInForm}
-            >
-              Sign Up Now.
-            </p>
-          </div>
-        ) : (
-          <div>
-            <p className="inline-block text-gray-500">Already a User? </p>
-            <p
-              className="px-2 inline-block cursor-pointer"
-              onClick={toggleSignInForm}
-            >
-              Sign In.
-            </p>
-          </div>
-        )}
+        <p className="py-4 cursor-pointer" onClick={toggleSignInForm}>
+          {isSignInForm
+            ? "New to Netflix? Sign Up Now"
+            : "Already registered? Sign In Now."}
+        </p>
       </form>
     </div>
   );
 };
-
 export default Login;
